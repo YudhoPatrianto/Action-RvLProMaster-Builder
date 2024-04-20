@@ -1,1 +1,57 @@
 name: RvLProMaster-Workspaces
+
+on: 
+    workflow_dispatch:
+        inputs:
+            RECOVERY_SELECT:
+                description: 'Pick Your Recovery'
+                required: true
+                default: ''
+                type: choice
+                options:
+                    - TWRP (twrp-12.1)
+                    - PBRP (android-12.1)
+                    - SHRP (shrp-12.1)
+                
+            URL_DEVICE_TREE: # Input Device Tree URL
+                description: 'Paste Your Recovery Device Tree'
+                required: true
+
+            DEVICE_TREE_BRANCH: # Input Device Tree Branch
+                description: 'Paste Your Recovery Device Tree Branch'
+                required: true
+
+            CODENAME: # Input Codename
+                description: 'Input Your Codename'
+                required: true
+
+            BUILD_VARIANT: # Build Variant (bootimage, recovery, pbrp, vendor_boot)
+                description: 'Select Your Variant Build'
+                required: true
+                type: choice
+                options: 
+                    - bootimage
+                    - recovery
+                    - vendor_boot
+                    - pbrp
+
+jobs: 
+    build:
+        runs-on: ubuntu-22.04
+        permissions:
+            contents: write
+        env:
+            packages: bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev repo jq pyhton-is-pyhon3 python3 pip
+        steps:
+            - name: Check Out # Check Out
+              uses: actions/checkout@v3
+            
+            - name: Packages Manager
+              run: |
+                sudo apt-get update > /dev/null 2>&1
+                sudo apt-get upgrade -y > /dev/null 2>&1
+                sudo apt-get install ${{ env.packages }} -y 
+
+
+                    
+

@@ -55,6 +55,11 @@ jobs:
                 sudo apt-get upgrade
                 sudo apt-get install ${{ env.packages }} -y 
 
+            - name: Setup Workdir
+              run: |
+                mkdir workdir
+                cd workdir/
+
 
                     
 

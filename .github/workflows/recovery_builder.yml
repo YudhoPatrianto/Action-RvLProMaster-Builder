@@ -48,8 +48,8 @@ jobs:
             
             - name: Packages Manager
               run: |
-                sudo apt-get update > /dev/null 2>&1
-                sudo apt-get upgrade -y > /dev/null 2>&1
+                sudo apt-get update
+                sudo apt-get upgrade
                 sudo apt-get install ${{ env.packages }} -y 
 
 

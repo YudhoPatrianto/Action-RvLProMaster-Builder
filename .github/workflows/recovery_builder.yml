@@ -59,6 +59,13 @@ jobs:
               run: |
                 mkdir workdir
                 cd workdir/
+            
+            - name: Sync Source 
+              run: |
+                if [[ ${{ github.event.inputs.RECOVERY_SELECT }} == *"TWRP (twrp-12.1)"* ]]; then
+                echo OK
+                fi
+
 
 
                     

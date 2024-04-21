@@ -34,6 +34,14 @@ on:
                     - recovery
                     - vendor_boot
                     - pbrp
+            
+            BRAND: 
+                description: 'Select Your Brand'
+                required: true
+                type: choice
+                default: xiaomi
+                options: 
+                    - xiaomi
 
 jobs: 
     build:
@@ -77,3 +85,6 @@ jobs:
                 fi
                 
                 repo sync --no-clone-bundle --force-sync -j$(nproc --all)
+
+            - name: Clone Device Tree
+              run: git clone ${{ github.event.inputs.URL_DEVICE_TREE }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} device/${{ github.event.inputs.BRAND }}/${{ github.event.inputs.CODENAME}}

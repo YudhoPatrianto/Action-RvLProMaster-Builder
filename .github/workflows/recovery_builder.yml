@@ -59,12 +59,17 @@ jobs:
               run: |
                 mkdir workdir
                 cd workdir/
-            
-            - name: Sync Source 
+
+            - name: Sync Source
               run: |
-                if [[ ${{ github.event.inputs.RECOVERY_SELECT }} == *"TWRP (twrp-12.1)"* ]]; then
-                echo OK
+                if [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "TWRP (twrp-12.1)" ]; then
+                    echo "You Choose TWRP (twrp-12.1)"
+                elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "PBRP (android-12.1)" ]; then
+                    echo "You Choose PBRP (android-12.1)"
+                elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "SHRP (shrp-12.1)" ]; then
+                    echo "You Choose SHRP (shrp-12.1)"
                 fi
+
 
 
 

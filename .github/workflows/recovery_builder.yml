@@ -94,11 +94,15 @@ jobs:
                 source build/envsetup.sh
                 if [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "TWRP (twrp-12.1)" ]; then
                     lunch twrp_${{ github.event.inputs.CODENAME }}-eng
-                    mka ${{ github.event.inputs.BUILD_VARIANT }}
+                    mka ${{ github.event.inputs.BUILD_VARIANT }} -j$(nproc --all)
                 elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "PBRP (android-12.1)" ]; then
-                    lunch pb_${{ github.event.inputs.CODENAME }}-eng
-                    mka ${{ github.event.inputs.BUILD_VARIANT }}
+                    lunch pb_${{ github.event.inputs.CODENAME }}-eng 
+                    mka ${{ github.event.inputs.BUILD_VARIANT }} -j$(nproc --all)
                 elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "SHRP (shrp-12.1)" ]; then
                     lunch twrp_${{ github.event.inputs.CODENAME }}-eng
-                    mka ${{ github.event.inputs.BUILD_VARIANT }}
+                    mka ${{ github.event.inputs.BUILD_VARIANT }} -j$(nproc --all)
                 fi
+            
+            - name: Check Env
+              run: |
+                printenv

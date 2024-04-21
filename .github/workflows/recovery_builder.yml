@@ -88,3 +88,17 @@ jobs:
 
             - name: Clone Device Tree
               run: git clone ${{ github.event.inputs.URL_DEVICE_TREE }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} device/${{ github.event.inputs.BRAND }}/${{ github.event.inputs.CODENAME}}
+
+            - name: Build Progress
+              run: |
+                source build/envsetup.sh
+                if [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "TWRP (twrp-12.1)" ]; then
+                    lunch twrp_${{ github.event.inputs.CODENAME }}-eng
+                    mka ${{ github.event.inputs.BUILD_VARIANT }}
+                elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "PBRP (android-12.1)" ]; then
+                    lunch pb_${{ github.event.inputs.CODENAME }}-eng
+                    mka ${{ github.event.inputs.BUILD_VARIANT }}
+                elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "SHRP (shrp-12.1)" ]; then
+                    lunch twrp_${{ github.event.inputs.CODENAME }}-eng
+                    mka ${{ github.event.inputs.BUILD_VARIANT }}
+                fi

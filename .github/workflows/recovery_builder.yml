@@ -12,7 +12,25 @@ on:
                     - TWRP (twrp-12.1)
                     - PBRP (android-12.1)
                     - SHRP (shrp-12.1)
-                
+                    
+            BUILD_VARIANT: # Build Variant (bootimage, recovery, pbrp, vendor_boot)
+                description: 'Select Your Variant Build'
+                required: true
+                type: choice
+                options: 
+                    - bootimage
+                    - recovery
+                    - vendor_boot
+                    - pbrp
+
+            BRAND:
+                description: 'Select Your Brand'
+                required: true
+                type: choice
+                default: xiaomi
+                options: 
+                    - xiaomi
+
             URL_DEVICE_TREE: # Input Device Tree URL
                 description: 'Paste Your Recovery Device Tree'
                 required: true
@@ -24,24 +42,6 @@ on:
             CODENAME: # Input Codename
                 description: 'Input Your Codename'
                 required: true
-
-            BUILD_VARIANT: # Build Variant (bootimage, recovery, pbrp, vendor_boot)
-                description: 'Select Your Variant Build'
-                required: true
-                type: choice
-                options: 
-                    - bootimage
-                    - recovery
-                    - vendor_boot
-                    - pbrp
-            
-            BRAND: 
-                description: 'Select Your Brand'
-                required: true
-                type: choice
-                default: xiaomi
-                options: 
-                    - xiaomi
 
 jobs: 
     build:

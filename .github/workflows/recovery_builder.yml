@@ -49,7 +49,7 @@ jobs:
         permissions:
             contents: write
         env:
-            packages: bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev repo jq python3 python2 pip
+            packages: bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev repo jq python3 python2 pip p7zip-full
             PBRP_URL: https://github.com/PitchBlackRecoveryProject/manifest_pb
             PBRP_BRANCH: android-12.1
             TWRP_URL: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp

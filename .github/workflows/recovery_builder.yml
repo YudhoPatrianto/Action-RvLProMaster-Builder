@@ -83,6 +83,9 @@ jobs:
                 elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "PBRP (android-12.1)" ]; then
                     repo init --depth=1 -u ${{ env.PBRP_URL }} -b ${{ env.PBRP_BRANCH }}
                     repo sync --no-clone-bundle --force-sync -j$(nproc --all)
+                elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "PBRP-ZIP ONLY (android-12.1)" ]; then
+                    repo init --depth=1 -u ${{ env.PBRP_URL }} -b ${{ env.PBRP_BRANCH }}
+                    repo sync --no-clone-bundle --force-sync -j$(nproc --all)
                 elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "SHRP (shrp-12.1)" ]; then
                     repo init --depth=1 -u ${{ env.SHRP_URL }} -b ${{ env.SHRP_BRANCH}}
                     repo sync --no-clone-bundle --force-sync -j$(nproc --all)

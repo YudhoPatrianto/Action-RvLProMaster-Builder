@@ -11,6 +11,7 @@ on:
                 options:
                     - TWRP (twrp-12.1)
                     - PBRP (android-12.1)
+                    - PBRP-ZIP ONLY (android-12.1)
                     - SHRP (shrp-12.1)
                     
             BUILD_VARIANT: # Build Variant (bootimage, recovery, pbrp, vendor_boot)
@@ -78,13 +79,14 @@ jobs:
               run: |
                 if [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "TWRP (twrp-12.1)" ]; then
                     repo init --depth=1 -u ${{ env.TWRP_URL }} -b ${{ env.TWRP_BRANCH }}
+                    repo sync --no-clone-bundle --force-sync -j$(nproc --all)
                 elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "PBRP (android-12.1)" ]; then
                     repo init --depth=1 -u ${{ env.PBRP_URL }} -b ${{ env.PBRP_BRANCH }}
+                    repo sync --no-clone-bundle --force-sync -j$(nproc --all)
                 elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "SHRP (shrp-12.1)" ]; then
                     repo init --depth=1 -u ${{ env.SHRP_URL }} -b ${{ env.SHRP_BRANCH}}
+                    repo sync --no-clone-bundle --force-sync -j$(nproc --all)
                 fi
-                
-                repo sync --no-clone-bundle --force-sync -j$(nproc --all)
 
             - name: Clone Device Tree
               run: git clone ${{ github.event.inputs.URL_DEVICE_TREE }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} device/${{ github.event.inputs.BRAND }}/${{ github.event.inputs.CODENAME}}
@@ -98,11 +100,16 @@ jobs:
                 elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "PBRP (android-12.1)" ]; then
                     lunch pb_${{ github.event.inputs.CODENAME }}-eng 
                     mka ${{ github.event.inputs.BUILD_VARIANT }} -j$(nproc --all)
+                elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "PBRP-ZIP ONLY (android-12.1)" ]; then
+                    lunch pb_${{ github.event.inputs.CODENAME }}-eng 
+                    mka pb ${{ github.event.inputs.BUILD_VARIANT }} -j$(nproc --all)
                 elif [ "${{ github.event.inputs.RECOVERY_SELECT }}" == "SHRP (shrp-12.1)" ]; then
                     lunch twrp_${{ github.event.inputs.CODENAME }}-eng
                     mka ${{ github.event.inputs.BUILD_VARIANT }} -j$(nproc --all)
                 fi
             
-            - name: Check Env
+            - name: Check And Upload
               run: |
-                printenv
+                result=$(echo $(pwd))/out/target/product/${{ github.event.inputs.CODENAME}}/$(echo $(pwd))/*.zip
+                echo "Found Zip File:" ${result}
+                curl -F "file=@${result}" https://temp.sh/upload

@@ -165,7 +165,6 @@ jobs:
                     fi
                 elif [[ ${{ inputs.RECOVERY }} == *"twrp-12.1"* ]]; then
                     if [[ ${{ env.find_makefile_types }} == *"twrp"* ]];
-                                        if [[ ${{ env.find_makefile_types }} == *"twrp"* ]];
                     # Compile Recovery
                     function compile() {
                       start=$(date +"%s")

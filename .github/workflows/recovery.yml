@@ -191,7 +191,6 @@ jobs:
                     fi
                 elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-12.1"* ]]; then
                     if [[ ${{ env.find_makefile_types }} == *"pb"* ]];
-                                        if [[ ${{ env.find_makefile_types }} == *"twrp"* ]];
                     # Compile Recovery
                     function compile() {
                       start=$(date +"%s")
@@ -218,7 +217,6 @@ jobs:
                     fi
                 elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-14.0"* ]]; then
                     if [[ ${{ env.find_makefile_types }} == *"pb"* ]];
-                                        if [[ ${{ env.find_makefile_types }} == *"twrp"* ]];
                     # Compile Recovery
                     function compile() {
                       start=$(date +"%s")

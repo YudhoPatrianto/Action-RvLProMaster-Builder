@@ -118,13 +118,13 @@ jobs:
                 if [[ ${{inputs.RECOVERY }} == *"twrp-14"* ]]; then
                   repo init --depth=1 -u ${{ env.twrp-14 }}
                   repo sync --force-sync --no-clone-bundle
-                elif [[ ${{inputs.RECOVERY }} == *"twrp-12-1"* ]]; then
+                elif [[ ${{inputs.RECOVERY }} == *"twrp-12.1"* ]]; then
                   repo init --depth=1 -u ${{ env.twrp-12-1 }}
                   repo sync --force-sync --no-clone-bundle
-                elif [[ ${{inputs.RECOVERY }} == *"pbrp-android-12-1"* ]]; then
+                elif [[ ${{inputs.RECOVERY }} == *"pbrp-android-12.1"* ]]; then
                   repo init --depth=1 -u ${{ env.pbrp-12-1 }}
                   repo sync --force-sync --no-clone-bundle
-                elif [[ ${{inputs.RECOVERY }} == *"pbrp-android-14-0"* ]]; then
+                elif [[ ${{inputs.RECOVERY }} == *"pbrp-android-14.0"* ]]; then
                   repo init --depth=1 -u ${{ env.pbrp-14-1 }}
                   repo sync --force-sync --no-clone-bundle
                 fi

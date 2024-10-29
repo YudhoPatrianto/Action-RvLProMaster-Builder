@@ -82,7 +82,7 @@ jobs:
           device_makefile: $(find device/${{ inputs.BRAND }}/${{ inputs.CODENAME}} -name "*_${{ inputs.CODENAME }}.mk*" | sed 's|device/${{ inputs.BRAND }}/${{ inputs.CODENAME}}/||' | sed 's|.mk||')
 
           # Telegram Stuff
-          tg_token: $(echo "${{ inputs.TG_TOKEN }}" | openssl enc -aes-256-cbc -a -salt -pass pass:"${{ secrets.GITHUB_TOKEN }}" -pbkdf2 -iter 10000 | openssl enc -aes-256-cbc -a -d -salt -pass:"${{ secrets.GITHUB_TOKEN }}" -pbkdf2 -iter 10000)
+          tg_token: $(echo "${{ inputs.TG_TOKEN }}" | openssl enc -aes-256-cbc -a -salt -pass pass:"${{ inputs.TG_CHAT_ID }}" -pbkdf2 -iter 10000 | openssl enc -aes-256-cbc -a -d -salt -pass:"${{ inputs.TG_CHAT_ID }}" -pbkdf2 -iter 10000)
           tg_chat_id: ${{ inputs.TG_CHAT_ID }}
 
           # echo color

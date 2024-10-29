@@ -1,0 +1,235 @@
+name: Custom Recovery Builder
+
+on:
+    workflow_dispatch:
+        inputs:
+          # Recovery
+            RECOVERY: 
+                description: "Choose Custom Recovery Want's Build"
+                required: true
+                type: choice
+                options:
+                    - twrp-14
+                    - twrp-12.1
+                    - pbrp-android-12.1
+                    - pbrp-android-14.0
+            # Brand
+            BRAND:
+              description: "Choose Your Brand"
+              required: true
+              type: choice
+              options:
+                - xiaomi
+            # Codename (If Your Codename Not Avaible, Make PR)
+            CODENAME:
+              description: "Choose Your Codename"
+              required: true
+              type: choice
+              options:
+                - selene # Xiaomi Redmi 10
+                - fire # Xiaomi Redmi 12
+            # Device Tree URL
+            DT_LINKS:
+                required: true
+                description: "Put Your Links Device Tree In Here"
+            # Device Tree Branch
+            DT_BRANCH:
+                required: true
+                description: "Put Your Branch Of Device Tree In Here"
+            # Build Variant
+            BUILD_VARIANT:
+              description: "Choose Your Build Variant"
+              required: true
+              type: choice
+              options:
+                - bootimage # bootimage (vA/B partititon Devices)
+                - vendor_boot # vendor_boot (vA/B partition Devices)
+                - recovery # recovery (recovery partition devices)
+                - pbrp # pbrp (Flashable Recovery For PBRP)
+            # Send TG?
+            SEND_TG:
+              required: true
+              default: true
+              type: boolean
+            # Telegram BOT Token
+            TG_TOKEN:
+                required: false
+                description: "Put Your Telegram BOT Token In Here" # TelegramBOT Token
+            # ChatID
+            TG_CHAT_ID:
+                required: false
+                description: "Put Your Telegram BOT Token In Here" # ChatID
+jobs:
+    build:
+        name: 'Compiling Recovery: ${{ inputs.RECOVERY }}'
+        runs-on: ubuntu-22.04
+        env:
+          # SECRET
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Links Recovery
+          twrp-14: "https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp -b twrp-14"
+          twrp-12.1: "https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp -b twrp-12.1"
+          pbrp-14.1: "https://github.com/PitchBlackRecoveryProject/manifest_pb -b android-14.0"
+          pbrp-12.1: "https://github.com/PitchBlackRecoveryProject/manifest_pb -b android-12.1"
+          
+          # Device Sources
+          dt-url: ${{ inputs.DT_LINKS }}
+          dt-branch: ${{ inputs.DT_BRANCH }}
+          brand: ${{ inputs.BRAND }}
+          codename: ${{ inputs.CODENAME }}
+          find_makefile_types: $(find device/${{ inputs.BRAND }}/${{ inputs.CODENAME}} -name "*_${{ inputs.CODENAME}}.mk*" | sed 's|device/${{ inputs.BRAND }}/${{ inputs.CODENAME}}/||' | sed 's|_${{ inputs.CODENAME }}.mk||')
+          device_makefile: $(find device/${{ inputs.BRAND }}/${{ inputs.CODENAME}} -name "*_${{ inputs.CODENAME }}.mk*" | sed 's|device/${{ inputs.BRAND }}/${{ inputs.CODENAME}}/||' | sed 's|.mk||')
+
+          # Telegram Stuff
+          tg_token: $(echo "${{ inputs.TG_TOKEN }}" | openssl enc -aes-256-cbc -a -salt -pass pass:"${{ secrets.GITHUB_TOKEN }}" -pbkdf2 -iter 10000 | openssl enc -aes-256-cbc -a -d -salt -pass pass:"${{ secrets.GITHUB_TOKEN }}" -pbkdf2 -iter 10000)
+        permissions:
+            contents: write
+
+        steps:
+            # Checkout
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            # Cleanup Dependencies
+            - name: Cleanup Dependencies
+              uses: rokibhasansagar/slimhub_actions@main
+
+            # Setting Swap
+            - name: Setting Swaps
+              uses: pierotofy/set-swap-space@master
+              with:
+                swap-size-gb: 32
+
+            # Upgrading And Updating Dependencies
+            - name: Update And Upgrade Dependencies
+              run: |
+                sudo apt-get update
+                sudo apt-get upgrade -y
+
+            # Installing Dependencies
+            - name: Installing Dependencies
+              run: |
+                sudo apt install bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev repo openssl -y
+
+            # Syncing Recovery
+            - name: Syncing Recovery
+              run: |
+                repo init --depth=1 -u ${{ inputs.RECOVERY }}
+                repo sync --force-sync --no-clone-bundle
+            
+            # Clone Device Tree
+            - name: Clonning Device Tree
+              run: |
+                git clone ${{ env.dt-url }} -b ${{ env.dt-branch }} device/${{ env.brand }}/${{ env.codename }}
+
+            # Building
+            - name: Compiling
+              run: |
+                if [[ ${{ inputs.RECOVERY }} == *"twrp-14"* ]]; then
+                    if [[ ${{ env.find_makefile_types }} == *"twrp"* ]];
+                    # Compile Recovery
+                    function compile() {
+                      start=$(date +"%s")
+                      source build/envsetup.sh
+                      lunch ${{ env.device_makefile }}-eng
+                      mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
+                      end=$(date +"%s")
+                      times=$((end - start))
+                      export minutes=$((times / 60))
+                      export seconds=$((times % 60))
+                    }
+                      compile
+                      
+                      # Read Logs
+                      logs_build=$(cat compile-${{ env.device_makefile }}.log)
+
+                      if [[ ${logs_build} == "build completed successfully"* ]]; then
+                      # Build No Error
+                      echo "Build Completed Takes Time ${minutes}m ${seconds}s"
+                      else
+                      # Build No Error
+                      echo "Build Failed Takes Time ${minutes}m ${seconds}s"
+                      fi
+                    fi
+                elif [[ ${{ inputs.RECOVERY }} == *"twrp-12.1"* ]]; then
+                    if [[ ${{ env.find_makefile_types }} == *"twrp"* ]];
+                                        if [[ ${{ env.find_makefile_types }} == *"twrp"* ]];
+                    # Compile Recovery
+                    function compile() {
+                      start=$(date +"%s")
+                      source build/envsetup.sh
+                      lunch ${{ env.device_makefile }}-eng
+                      mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
+                      end=$(date +"%s")
+                      times=$((end - start))
+                      export minutes=$((times / 60))
+                      export seconds=$((times % 60))
+                    }
+                      compile
+                      
+                      # Read Logs
+                      logs_build=$(cat compile-${{ env.device_makefile }}.log)
+
+                      if [[ ${logs_build} == "build completed successfully"* ]]; then
+                      # Build No Error
+                      echo "Build Completed Takes Time ${minutes}m ${seconds}s"
+                      else
+                      # Build No Error
+                      echo "Build Failed Takes Time ${minutes}m ${seconds}s"
+                      fi
+                    fi
+                elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-12.1"* ]]; then
+                    if [[ ${{ env.find_makefile_types }} == *"pb"* ]];
+                                        if [[ ${{ env.find_makefile_types }} == *"twrp"* ]];
+                    # Compile Recovery
+                    function compile() {
+                      start=$(date +"%s")
+                      source build/envsetup.sh
+                      lunch ${{ env.device_makefile }}-eng
+                      mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
+                      end=$(date +"%s")
+                      times=$((end - start))
+                      export minutes=$((times / 60))
+                      export seconds=$((times % 60))
+                    }
+                      compile
+                      
+                      # Read Logs
+                      logs_build=$(cat compile-${{ env.device_makefile }}.log)
+
+                      if [[ ${logs_build} == "build completed successfully"* ]]; then
+                      # Build No Error
+                      echo "Build Completed Takes Time ${minutes}m ${seconds}s"
+                      else
+                      # Build No Error
+                      echo "Build Failed Takes Time ${minutes}m ${seconds}s"
+                      fi
+                    fi
+                elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-14.0"* ]]; then
+                    if [[ ${{ env.find_makefile_types }} == *"pb"* ]];
+                                        if [[ ${{ env.find_makefile_types }} == *"twrp"* ]];
+                    # Compile Recovery
+                    function compile() {
+                      start=$(date +"%s")
+                      source build/envsetup.sh
+                      lunch ${{ env.device_makefile }}-eng
+                      mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
+                      end=$(date +"%s")
+                      times=$((end - start))
+                      export minutes=$((times / 60))
+                      export seconds=$((times % 60))
+                    }
+                      compile
+                      
+                      # Read Logs
+                      logs_build=$(cat compile-${{ env.device_makefile }}.log)
+
+                      if [[ ${logs_build} == "build completed successfully"* ]]; then
+                      # Build No Error
+                      echo "Build Completed Takes Time ${minutes}m ${seconds}s"
+                      else
+                      # Build No Error
+                      echo "Build Failed Takes Time ${minutes}m ${seconds}s"
+                      fi
+                    fi
+                fi

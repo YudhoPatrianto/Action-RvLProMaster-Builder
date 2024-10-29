@@ -82,7 +82,14 @@ jobs:
           device_makefile: $(find device/${{ inputs.BRAND }}/${{ inputs.CODENAME}} -name "*_${{ inputs.CODENAME }}.mk*" | sed 's|device/${{ inputs.BRAND }}/${{ inputs.CODENAME}}/||' | sed 's|.mk||')
 
           # Telegram Stuff
-          tg_token: $(echo "${{ inputs.TG_TOKEN }}" | openssl enc -aes-256-cbc -a -salt -pass pass:"${{ secrets.GITHUB_TOKEN }}" -pbkdf2 -iter 10000 | openssl enc -aes-256-cbc -a -d -salt -pass pass:"${{ secrets.GITHUB_TOKEN }}" -pbkdf2 -iter 10000)
+          tg_token: $(echo "${{ inputs.TG_TOKEN }}" | openssl enc -aes-256-cbc -a -salt -pass pass:"${{ secrets.GITHUB_TOKEN }}" -pbkdf2 -iter 10000 | openssl enc -aes-256-cbc -a -d -salt -pass:"${{ secrets.GITHUB_TOKEN }}" -pbkdf2 -iter 10000)
+          tg_chat_id: ${{ inputs.TG_CHAT_ID }}
+
+          # echo color
+          text-green: '\033[0;32m'
+          text-red: '\033[0;31m'
+          text-reset_color: '\033[0m'
+
         permissions:
             contents: write
 
@@ -101,12 +108,6 @@ jobs:
               with:
                 swap-size-gb: 32
 
-            # Create Folder
-            - name: Creating Folder
-              run: |
-                mkdir recovery
-                cd recovery
-
             # Upgrading And Updating Dependencies
             - name: Update And Upgrade Dependencies
               run: |
@@ -122,15 +123,19 @@ jobs:
             - name: Syncing Recovery
               run: |
                 if [[ ${{inputs.RECOVERY }} == *"twrp-14"* ]]; then
+                  echo -e "${{ env.text-green}}[INFO] Syncing Recovery: ${{ inputs.RECOVERY }}${{ env.text-reset_color}}"
                   repo init --depth=1 -u ${{ env.twrp-14 }}
                   repo sync --force-sync --no-clone-bundle
                 elif [[ ${{inputs.RECOVERY }} == *"twrp-12.1"* ]]; then
+                  echo -e "${{ env.text-green}}[INFO] Syncing Recovery: ${{ inputs.RECOVERY }}${{ env.text-reset_color}}"
                   repo init --depth=1 -u ${{ env.twrp-12-1 }}
                   repo sync --force-sync --no-clone-bundle
                 elif [[ ${{inputs.RECOVERY }} == *"pbrp-android-12.1"* ]]; then
+                  echo -e "${{ env.text-green}}[INFO] Syncing Recovery: ${{ inputs.RECOVERY }}${{ env.text-reset_color}}"
                   repo init --depth=1 -u ${{ env.pbrp-12-1 }}
                   repo sync --force-sync --no-clone-bundle
                 elif [[ ${{inputs.RECOVERY }} == *"pbrp-android-14.0"* ]]; then
+                  echo -e "${{ env.text-green}}[INFO] Syncing Recovery: ${{ inputs.RECOVERY }}${{ env.text-reset_color}}"
                   repo init --depth=1 -u ${{ env.pbrp-14-1 }}
                   repo sync --force-sync --no-clone-bundle
                 fi
@@ -163,9 +168,19 @@ jobs:
 
                         if [[ ${logs_build} == "build completed successfully"* ]]; then
                             # Build No Error
-                            echo "Build Completed Takes Time ${minutes}m ${seconds}s"
+                            # Send Log
+                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
+                            -F chat_id="${{ env.tg_chat_id }}" \
+                            -F "document=@compile-${{ env.device_makefile }}.log" \
+                            -F disable_notification=False 
                         else
                             # Build Failed
+                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
+                            -F chat_id="${{ env.tg_chat_id }}" \
+                            -F "document=@compile-${{ env.device_makefile }}.log" \
+                            -F "caption=<b>Build Failed Takes Time</b> <code>${minutes}</code><b>m</b> <code>${seconds}<code><b>s</b>" \
+                            -F parse_mode=HTML \
+                            -F disable_notification=False 
                             echo "Build Failed Takes Time ${minutes}m ${seconds}s"
                         fi
                     fi
@@ -189,9 +204,19 @@ jobs:
 
                         if [[ ${logs_build} == "build completed successfully"* ]]; then
                             # Build No Error
-                            echo "Build Completed Takes Time ${minutes}m ${seconds}s"
+                            # Send Log
+                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
+                            -F chat_id="${{ env.tg_chat_id }}" \
+                            -F "document=@compile-${{ env.device_makefile }}.log" \
+                            -F disable_notification=False 
                         else
                             # Build Failed
+                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
+                            -F chat_id="${{ env.tg_chat_id }}" \
+                            -F "document=@compile-${{ env.device_makefile }}.log" \
+                            -F "caption=<b>Build Failed Takes Time</b> <code>${minutes}</code><b>m</b> <code>${seconds}<code><b>s</b>" \
+                            -F parse_mode=HTML \
+                            -F disable_notification=False 
                             echo "Build Failed Takes Time ${minutes}m ${seconds}s"
                         fi
                     fi
@@ -215,9 +240,19 @@ jobs:
 
                         if [[ ${logs_build} == "build completed successfully"* ]]; then
                             # Build No Error
-                            echo "Build Completed Takes Time ${minutes}m ${seconds}s"
+                            # Send Log
+                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
+                            -F chat_id="${{ env.tg_chat_id }}" \
+                            -F "document=@compile-${{ env.device_makefile }}.log" \
+                            -F disable_notification=False 
                         else
                             # Build Failed
+                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
+                            -F chat_id="${{ env.tg_chat_id }}" \
+                            -F "document=@compile-${{ env.device_makefile }}.log" \
+                            -F "caption=<b>Build Failed Takes Time</b> <code>${minutes}</code><b>m</b> <code>${seconds}<code><b>s</b>" \
+                            -F parse_mode=HTML \
+                            -F disable_notification=False 
                             echo "Build Failed Takes Time ${minutes}m ${seconds}s"
                         fi
                     fi
@@ -241,10 +276,32 @@ jobs:
 
                         if [[ ${logs_build} == "build completed successfully"* ]]; then
                             # Build No Error
-                            echo "Build Completed Takes Time ${minutes}m ${seconds}s"
+                            # Send Log
+                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
+                            -F chat_id="${{ env.tg_chat_id }}" \
+                            -F "document=@compile-${{ env.device_makefile }}.log" \
+                            -F disable_notification=False 
                         else
                             # Build Failed
+                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
+                            -F chat_id="${{ env.tg_chat_id }}" \
+                            -F "document=@compile-${{ env.device_makefile }}.log" \
+                            -F "caption=<b>Build Failed Takes Time</b> <code>${minutes}</code><b>m</b> <code>${seconds}<code><b>s</b>" \
+                            -F parse_mode=HTML \
+                            -F disable_notification=False 
                             echo "Build Failed Takes Time ${minutes}m ${seconds}s"
                         fi
                     fi
                 fi
+
+            - name: Uploading To Telegram BOT
+              if: inputs.SEND_TG == 'true'
+              run: |
+                builddate=$(cat out/build_date.txt)
+                mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/pbrp-${{ env.codename }}-${builddate}.img
+                curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
+                -F chat_id="${{ env.tg_chat_id }}" \
+                -F "document=@out/target/product/${{ env.codename }}/pbrp-${{ env.codename }}-${builddate}.img" \
+                -F "caption=<b>Build Success Takes Time</b> <code>${minutes}</code><b>m</b> <code>${seconds}<code><b>s</b>" \
+                -F parse_mode=HTML \
+                -F disable_notification=False

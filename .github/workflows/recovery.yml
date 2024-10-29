@@ -101,6 +101,12 @@ jobs:
               with:
                 swap-size-gb: 32
 
+            # Create Folder
+            - name: Creating Folder
+              run: |
+                mkdir recovery
+                cd recovery
+
             # Upgrading And Updating Dependencies
             - name: Update And Upgrade Dependencies
               run: |
@@ -137,107 +143,108 @@ jobs:
             # Building
             - name: Compiling
               run: |
-                if [[ pbrp-android-12.1 == *"twrp-14"* ]]; then
-                    if [[ $(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|_fire.mk||') == *"twrp"* ]]; then
+                if [[ ${{ inputs.RECOVERY }} == *"twrp-14"* ]]; then
+                    if [[ ${{ env.find_makefile_types }} == *"twrp"* ]]; then
                         # Compile Recovery
                         function compile() {
                             start=$(date +"%s")
                             source build/envsetup.sh
-                            lunch $(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||')-eng
-                            mka bootimage | 2>&1 tee compile-$(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||').log
+                            lunch ${{ env.device_makefile }}-eng
+                            mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
                             end=$(date +"%s")
                             times=$((end - start))
                             export minutes=$((times / 60))
                             export seconds=$((times % 60))
                         }
                         compile
-
+                        
                         # Read Logs
-                        logs_build=$(cat compile-$(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||').log)
+                        logs_build=$(cat compile-${{ env.device_makefile }}.log)
 
                         if [[ ${logs_build} == "build completed successfully"* ]]; then
                             # Build No Error
                             echo "Build Completed Takes Time ${minutes}m ${seconds}s"
                         else
-                            # Build No Error
+                            # Build Failed
                             echo "Build Failed Takes Time ${minutes}m ${seconds}s"
                         fi
                     fi
-                elif [[ pbrp-android-12.1 == *"twrp-12.1"* ]]; then
-                    if [[ $(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|_fire.mk||') == *"twrp"* ]]; then
+                elif [[ ${{ inputs.RECOVERY }} == *"twrp-12.1"* ]]; then
+                    if [[ ${{ env.find_makefile_types }} == *"twrp"* ]]; then
                         # Compile Recovery
                         function compile() {
                             start=$(date +"%s")
                             source build/envsetup.sh
-                            lunch $(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||')-eng
-                            mka bootimage | 2>&1 tee compile-$(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||').log
+                            lunch ${{ env.device_makefile }}-eng
+                            mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
                             end=$(date +"%s")
                             times=$((end - start))
                             export minutes=$((times / 60))
                             export seconds=$((times % 60))
                         }
                         compile
-
+                        
                         # Read Logs
-                        logs_build=$(cat compile-$(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||').log)
+                        logs_build=$(cat compile-${{ env.device_makefile }}.log)
 
                         if [[ ${logs_build} == "build completed successfully"* ]]; then
                             # Build No Error
                             echo "Build Completed Takes Time ${minutes}m ${seconds}s"
                         else
-                            # Build No Error
+                            # Build Failed
                             echo "Build Failed Takes Time ${minutes}m ${seconds}s"
                         fi
                     fi
-                elif [[ pbrp-android-12.1 == *"pbrp-android-12.1"* ]]; then
-                    if [[ $(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|_fire.mk||') == *"pb"* ]]; then
+                elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-12.1"* ]]; then
+                    if [[ ${{ env.find_makefile_types }} == *"pb"* ]]; then
                         # Compile Recovery
                         function compile() {
                             start=$(date +"%s")
                             source build/envsetup.sh
-                            lunch $(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||')-eng
-                            mka bootimage | 2>&1 tee compile-$(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||').log
+                            lunch ${{ env.device_makefile }}-eng
+                            mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
                             end=$(date +"%s")
                             times=$((end - start))
                             export minutes=$((times / 60))
                             export seconds=$((times % 60))
                         }
                         compile
-
+                        
                         # Read Logs
-                        logs_build=$(cat compile-$(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||').log)
+                        logs_build=$(cat compile-${{ env.device_makefile }}.log)
 
                         if [[ ${logs_build} == "build completed successfully"* ]]; then
                             # Build No Error
                             echo "Build Completed Takes Time ${minutes}m ${seconds}s"
                         else
-                            # Build No Error
+                            # Build Failed
                             echo "Build Failed Takes Time ${minutes}m ${seconds}s"
                         fi
                     fi
-                elif [[ pbrp-android-12.1 == *"pbrp-android-14.0"* ]]; then
-                    if [[ $(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|_fire.mk||') == *"pb"* ]]; then
+                elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-14.0"* ]]; then
+                    if [[ ${{ env.find_makefile_types }} == *"pb"* ]]; then
                         # Compile Recovery
                         function compile() {
                             start=$(date +"%s")
                             source build/envsetup.sh
-                            lunch $(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||')-eng
-                            mka bootimage | 2>&1 tee compile-$(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||').log
+                            lunch ${{ env.device_makefile }}-eng
+                            mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
                             end=$(date +"%s")
                             times=$((end - start))
                             export minutes=$((times / 60))
                             export seconds=$((times % 60))
                         }
                         compile
-
+                        
                         # Read Logs
-                        logs_build=$(cat compile-$(find device/xiaomi/fire -name "*_fire.mk*" | sed 's|device/xiaomi/fire/||' | sed 's|.mk||').log)
+                        logs_build=$(cat compile-${{ env.device_makefile }}.log)
 
                         if [[ ${logs_build} == "build completed successfully"* ]]; then
                             # Build No Error
                             echo "Build Completed Takes Time ${minutes}m ${seconds}s"
                         else
-                            # Build No Error
+                            # Build Failed
                             echo "Build Failed Takes Time ${minutes}m ${seconds}s"
                         fi
                     fi
+                fi

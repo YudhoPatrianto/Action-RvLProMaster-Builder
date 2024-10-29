@@ -48,6 +48,7 @@ on:
                 - pbrp # pbrp (Flashable Recovery For PBRP)
             # Send TG?
             SEND_TG:
+              description: "Send To BOT Telegram?"
               required: true
               default: true
               type: boolean

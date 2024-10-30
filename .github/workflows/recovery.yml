@@ -227,13 +227,14 @@ jobs:
 
             - name: Uploading To Telegram BOT
               run: |
+                echo -e "Minutes: ${minutes}\nSeconds: ${seconds}"
                 if [[ ${{ inputs.SEND_TG }} == *"true"* ]]; then
                     builddate=$(cat out/build_date.txt)
                     mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/pbrp-${{ env.codename }}-${builddate}.img
                     curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
                     -F chat_id="${{ env.tg_chat_id }}" \
                     -F document="@compile-${{ env.device_makefile }}.log" \
-                    -F caption="*Success Build! ${{ inputs.RECOVERY }} For Device: \`${{ inputs.CODENAME }}\`*" \
+                    -F caption="*Success Build!* \`${{ inputs.RECOVERY }}\` *For Device:* \`${{ inputs.CODENAME }}\`*" \
                     -F parse_mode=Markdown \
                     -F disable_notification=False
                 fi

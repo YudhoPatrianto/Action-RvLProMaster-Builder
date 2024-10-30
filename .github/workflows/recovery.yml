@@ -98,6 +98,15 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
+            # Check All
+            - name: Check All
+              run: |
+                echo "Recovery: ${{ inputs.RECOVERY }}"
+                echo "Codename: ${{ inputs.CODENAME }}"
+                echo "Device Tree URL: ${{ inputs.DT_LINKS }}"
+                echo "Device Tree Branch: ${{ inputs.DT_BRANCH }}"
+                echo "Send Telegram BOT: ${{ inputs.SEND_TG }}"
+
             # Cleanup Dependencies
             - name: Cleanup Dependencies
               uses: rokibhasansagar/slimhub_actions@main
@@ -223,7 +232,7 @@ jobs:
                 mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/pbrp-${{ env.codename }}-${builddate}.img
                 curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
                 -F chat_id="${{ env.tg_chat_id }}" \
-                -F "document=@out/target/product/${{ env.codename }}/pbrp-${{ env.codename }}-${builddate}.img" \
-                -F "caption=<b>Build Success Takes Time</b> <code>${minutes}</code><b>m</b> <code>${seconds}<code><b>s</b>" \
-                -F parse_mode=HTML \
+                -F document="@compile-${{ env.device_makefile }}.log" \
+                -F caption="*Success Build! ${{ inputs.RECOVERY }} For Device: \`${{ inputs.CODENAME }}\`*" \
+                -F parse_mode=Markdown \
                 -F disable_notification=False

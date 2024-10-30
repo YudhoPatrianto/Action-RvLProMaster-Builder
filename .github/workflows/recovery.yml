@@ -162,27 +162,6 @@ jobs:
                             export seconds=$((times % 60))
                         }
                         compile
-                        
-                        # Read Logs
-                        logs_build=$(cat compile-${{ env.device_makefile }}.log)
-
-                        if [[ ${logs_build} == "build completed successfully"* ]]; then
-                            # Build No Error
-                            # Send Log
-                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
-                            -F chat_id="${{ env.tg_chat_id }}" \
-                            -F "document=@compile-${{ env.device_makefile }}.log" \
-                            -F disable_notification=False 
-                        else
-                            # Build Failed
-                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
-                            -F chat_id="${{ env.tg_chat_id }}" \
-                            -F "document=@compile-${{ env.device_makefile }}.log" \
-                            -F "caption=<b>Build Failed Takes Time</b> <code>${minutes}</code><b>m</b> <code>${seconds}<code><b>s</b>" \
-                            -F parse_mode=HTML \
-                            -F disable_notification=False 
-                            echo "Build Failed Takes Time ${minutes}m ${seconds}s"
-                        fi
                     fi
                 elif [[ ${{ inputs.RECOVERY }} == *"twrp-12.1"* ]]; then
                     if [[ ${{ env.find_makefile_types }} == *"twrp"* ]]; then
@@ -198,27 +177,6 @@ jobs:
                             export seconds=$((times % 60))
                         }
                         compile
-                        
-                        # Read Logs
-                        logs_build=$(cat compile-${{ env.device_makefile }}.log)
-
-                        if [[ ${logs_build} == "build completed successfully"* ]]; then
-                            # Build No Error
-                            # Send Log
-                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
-                            -F chat_id="${{ env.tg_chat_id }}" \
-                            -F "document=@compile-${{ env.device_makefile }}.log" \
-                            -F disable_notification=False 
-                        else
-                            # Build Failed
-                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
-                            -F chat_id="${{ env.tg_chat_id }}" \
-                            -F "document=@compile-${{ env.device_makefile }}.log" \
-                            -F "caption=<b>Build Failed Takes Time</b> <code>${minutes}</code><b>m</b> <code>${seconds}<code><b>s</b>" \
-                            -F parse_mode=HTML \
-                            -F disable_notification=False 
-                            echo "Build Failed Takes Time ${minutes}m ${seconds}s"
-                        fi
                     fi
                 elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-12.1"* ]]; then
                     if [[ ${{ env.find_makefile_types }} == *"pb"* ]]; then
@@ -237,24 +195,6 @@ jobs:
                         
                         # Read Logs
                         logs_build=$(cat compile-${{ env.device_makefile }}.log)
-
-                        if [[ ${logs_build} == "build completed successfully"* ]]; then
-                            # Build No Error
-                            # Send Log
-                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
-                            -F chat_id="${{ env.tg_chat_id }}" \
-                            -F "document=@compile-${{ env.device_makefile }}.log" \
-                            -F disable_notification=False 
-                        else
-                            # Build Failed
-                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
-                            -F chat_id="${{ env.tg_chat_id }}" \
-                            -F "document=@compile-${{ env.device_makefile }}.log" \
-                            -F "caption=<b>Build Failed Takes Time</b> <code>${minutes}</code><b>m</b> <code>${seconds}<code><b>s</b>" \
-                            -F parse_mode=HTML \
-                            -F disable_notification=False 
-                            echo "Build Failed Takes Time ${minutes}m ${seconds}s"
-                        fi
                     fi
                 elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-14.0"* ]]; then
                     if [[ ${{ env.find_makefile_types }} == *"pb"* ]]; then
@@ -273,24 +213,6 @@ jobs:
                         
                         # Read Logs
                         logs_build=$(cat compile-${{ env.device_makefile }}.log)
-
-                        if [[ ${logs_build} == "build completed successfully"* ]]; then
-                            # Build No Error
-                            # Send Log
-                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
-                            -F chat_id="${{ env.tg_chat_id }}" \
-                            -F "document=@compile-${{ env.device_makefile }}.log" \
-                            -F disable_notification=False 
-                        else
-                            # Build Failed
-                            curl -s -X POST "https://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \
-                            -F chat_id="${{ env.tg_chat_id }}" \
-                            -F "document=@compile-${{ env.device_makefile }}.log" \
-                            -F "caption=<b>Build Failed Takes Time</b> <code>${minutes}</code><b>m</b> <code>${seconds}<code><b>s</b>" \
-                            -F parse_mode=HTML \
-                            -F disable_notification=False 
-                            echo "Build Failed Takes Time ${minutes}m ${seconds}s"
-                        fi
                     fi
                 fi
 

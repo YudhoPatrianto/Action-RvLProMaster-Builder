@@ -126,7 +126,7 @@ jobs:
             # Installing Dependencies
             - name: Installing Dependencies
               run: |
-                sudo apt install bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev repo openssl python2 python3 python-is-python3 -y
+                sudo apt install bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev repo openssl python2 python3 python-is-python3 jq -y
 
             # Syncing Recovery
             - name: Syncing Recovery
@@ -236,5 +236,6 @@ jobs:
                     -F document="@compile-${{ env.device_makefile }}.log" \
                     -F caption="*Success Build!* \`${{ inputs.RECOVERY }}\` *For Device:* \`${{ inputs.CODENAME }}\`*" \
                     -F parse_mode=Markdown \
-                    -F disable_notification=False
+                    -F disable_notification=False \
+                    | jq -r '.result'
                 fi

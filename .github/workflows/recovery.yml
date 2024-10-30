@@ -106,7 +106,7 @@ jobs:
             - name: Setting Swaps
               uses: pierotofy/set-swap-space@master
               with:
-                swap-size-gb: 32
+                swap-size-gb: 16
 
             # Upgrading And Updating Dependencies
             - name: Update And Upgrade Dependencies

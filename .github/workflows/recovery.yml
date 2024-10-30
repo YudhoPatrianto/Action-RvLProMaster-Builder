@@ -227,7 +227,7 @@ jobs:
 
             - name: Uploading To Telegram BOT
               run: |
-                if [[ ${{ input.SEND_TG }} == *"true"* ]]; then
+                if [[ ${{ inputs.SEND_TG }} == *"true"* ]]; then
                     builddate=$(cat out/build_date.txt)
                     mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/pbrp-${{ env.codename }}-${builddate}.img
                     curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.tg_token }}/sendDocument" \

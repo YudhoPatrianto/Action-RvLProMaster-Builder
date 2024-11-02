@@ -212,8 +212,10 @@ jobs:
                             | jq -r '.result'
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; # Check Build variant (vendor_boot)
                           # VENDOR_BOOT
+                          echo ""
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"recovery"* ]]; # Check Build variant (recovery)
                           # RECOVERY
+                          echo ""
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"pbrp"* ]]; # Check Build variant (pbrp)
                           echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
                           f_zip=$(find out/target/product/${{ env.codename }} -name "*PBRP-${{ env.codename }}-*")
@@ -298,8 +300,10 @@ jobs:
                             | jq -r '.result'
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; # Check Build variant (vendor_boot)
                           # VENDOR_BOOT
+                          echo ""
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"recovery"* ]]; # Check Build variant (recovery)
                           # RECOVERY
+                          echo ""
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"pbrp"* ]]; # Check Build variant (pbrp)
                           echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
                           f_zip=$(find out/target/product/${{ env.codename }} -name "*PBRP-${{ env.codename }}-*")
@@ -383,8 +387,10 @@ jobs:
                             | jq -r '.result'
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; # Check Build variant (vendor_boot)
                           # VENDOR_BOOT
+                          echo ""
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"recovery"* ]]; # Check Build variant (recovery)
                           # RECOVERY
+                          echo ""
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"pbrp"* ]]; # Check Build variant (pbrp)
                           echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
                           f_zip=$(find out/target/product/${{ env.codename }} -name "*PBRP-${{ env.codename }}-*")
@@ -468,8 +474,10 @@ jobs:
                             | jq -r '.result'
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; # Check Build variant (vendor_boot)
                           # VENDOR_BOOT
+                          echo ""
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"recovery"* ]]; # Check Build variant (recovery)
                           # RECOVERY
+                          echo ""
                         elif [[ ${{ inputs.BUILD_VARIANT }} == *"pbrp"* ]]; # Check Build variant (pbrp)
                           echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
                           f_zip=$(find out/target/product/${{ env.codename }} -name "*PBRP-${{ env.codename }}-*")
@@ -499,3 +507,15 @@ jobs:
                     exit 1
                   fi # end Check Device Makefile for twrp-14
                 fi # End Compiling condition (twrp-14 | twrp-12.1 | pbrp-android-12.1 | pbrp-android-14.0)
+            
+            # Upload to release
+            - name: Upload To Releases
+              uses: softprops/action-gh-release@master
+              if: inputs.SEND_TG == 'false'
+              with:
+                files: |
+                  compile-${{ env.device_makefile }}.log
+                  out/target/product/${{ env.codename }}/PBRP*.zip
+                  out/target/product/${{ env.codename }}/twrp-installer*.zip
+                  out/target/product/${{ env.codename }}/*.zip
+                  out/target/product/${{ env.codename}}/boot.img

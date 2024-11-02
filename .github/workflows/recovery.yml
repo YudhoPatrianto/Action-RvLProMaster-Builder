@@ -158,211 +158,344 @@ jobs:
             # Building
             - name: Compiling
               run: |
-                # Build TWRP Branch twrp-14
+                # Compile twrp-14
                 if [[ ${{ inputs.RECOVERY }} == *"twrp-14"* ]]; then
-                    if [[ ${{ env.find_makefile_types }} == *"twrp"* ]]; then
-                        # Compile Recovery
-                        function compile() {
-                            start=$(date +"%s")
-                            source build/envsetup.sh
-                            lunch ${{ env.device_makefile }}-eng
-                            mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
-                            end=$(date +"%s")
-                            times=$((end - start))
-                            export minutes=$((times / 60))
-                            export seconds=$((times % 60))
-                        }
-                        compile
+                  echo -e "${{ env.text-green}}[INFO] Compiling Recovery: ${{ inputs.RECOVERY }}${{ env.text-reset_color}}"
+                  
+                  # Check Device Makefile
+                  if [[ ${{ env.find_makefile_types }} == *"twrp"* ]]; then
+                    echo -e "${{ env.text-green}}[INFO]${{ env.text-reset_color}}Compiling Recovery: ${{ inputs.RECOVERY }} For Codename: ${{ env.codename }}"
 
-                        # Read Logs
-                        logs_build=$(cat compile-${{ env.device_makefile }}.log)
+                    function compile() {
+                      start=$(date +%s)
+                      source build/envsetup.sh
+                      lunch ${{ env.device_makefile }}-eng
+                      mka ${{ inputs.BUILD_VARIANT }} -j$(nproc --all) | 2>&1 tee compile_${{ env.device_makefile }}.log
+                      end=$(date +%s)
+                      time_man=$((end - start))
 
-                        if [[ ${{ inputs.SEND_TG }} == *"true"* ]]; then
-                          if [[ ${logs_build} == *"build completed successfully"* ]]; then
-                            # File Stuff
-                            builddt=$(cat out/build_date.txt)
-                            mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/twrp-${{ env.codename }}-${builddt}
+                      # Minutes And Second
+                      export hours=$((time_man / 3600))
+                      export minutes=$(((time_man % 3600 ) / 60 ))
+                      export seconds=$((time_man % 60))
+                    } 
+                    compile # Compile 
 
-                            # Send Log
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}" \
-                              -F document="@compile-${{ env.device_makefile }}.log" \
-                              -F caption="*Success Build!* \`${{ inputs.RECOVERY }}\` *For Device:* \`${{ inputs.CODENAME }}\`*" \
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
+                    read_logs=$(cat compile_${{ env.device_makefile }}.log)
 
-                            # Send File
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}"
-                              -F document="@out/target/product/${{ env.codename }}/twrp-${{ env.codename }}-${builddt}" \
-                              -F caption="*Build Completed Successfuly at* \`${minutes}\`*m* \`${seconds}\`*s*"
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
-                          else
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}"
-                              -F document="@compile-${{ env.device_makefile }}.log" \
-                              -F caption="*Build Failed at* \`${minutes}\`*m* \`${seconds}\`*s*"
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
-                          fi
-                        else
-                        fi # Condition Check TG?
-                    fi
+                    if [[ ${read_logs} == *"build completed successfully"* ]]; then # Check Build Error Or Not
+                      echo -e "${{ env.text-green}}[SUCCESS]${{ env.text-reset_color}}Success Building ${{ inputs.RECOVERY }} For Device ${{ env.codename }}"
+                      if [[ ${{ inputs.SEND_TG}} == *"true"* ]]; then # Send To Telegram Bot?
+                        echo -e "${{ env.text-green}}[UPLOAD]${{ env.text-reset_color}} Uploading Log To Telegram BOT"
+                        # Send Logs
+                        curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                          -F chat_id=${{ env.tg_chat_id }} \
+                          -F document="@compile_${{ env.device_makefile }}" \
+                          -F caption="*Build Success For Device* \`${{ env.codename }}\`" \
+                          -F parse_mode="Markdown" \
+                          -F disable_notification=False \
+                          | jq -r '.result'
 
-                # Build TWRP Branch twrp-12.1 
+                        # Upload File But Spesify Build Variant
+                        if [[ ${{ inputs.BUILD_VARIANT }} == *"bootimage"* ]]; then # Check Build variant (bootimage)
+                          echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
+                          read_builddate=$(out/build_date.txt)
+                          mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/boot-twrp_${{ env.codename }}-${read_builddate}.img
+
+                          # Send File
+                          curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                            -F chat_id=${{ env.tg_chat_id }} \
+                            -F document="@out/target/product/${{ env.codename }}/boot-twrp_${{ env.codename }}-${read_builddate}.img" \
+                            -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                            -F parse_mode="Markdown" \
+                            -F disable_notification=False \
+                            | jq -r '.result'
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; # Check Build variant (vendor_boot)
+                          # VENDOR_BOOT
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"recovery"* ]]; # Check Build variant (recovery)
+                          # RECOVERY
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"pbrp"* ]]; # Check Build variant (pbrp)
+                          echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
+                          f_zip=$(find out/target/product/${{ env.codename }} -name "*PBRP-${{ env.codename }}-*")
+
+                          # Send File
+                          curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                            -F chat_id=${{ env.tg_chat_id }} \
+                            -F document="@${f_zip}" \
+                            -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                            -F parse_mode="Markdown" \
+                            -F disable_notification=False \
+                            | jq -r '.result'
+                        fi # End Check Build variant
+                      fi # End Send To Telegram Bot?
+                    else
+                      echo -e "${{ env.text-green}}[FAILED]${{ env.text-reset_color}}Failed Building ${{ inputs.RECOVERY }} For Device ${{ env.codename }} Please Check Logs In Your Bots Or Releases In Github"
+                      curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                        -F chat_id=${{ env.tg_chat_id }} \
+                        -F document="@compile_${{ env.device_makefile }}.log}" \
+                        -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                        -F parse_mode="Markdown" \
+                        -F disable_notification=False \
+                        | jq -r '.result'
+                    fi # End Check Build Error Or Not
+                  else
+                    echo -e "${{ env.text-red }}[ERROR]${{ env.text-reset_color}}Your Device Makefile ${{ env.device_makefile }}Not Supported please use twrp_<codename>.mk"
+                    exit 1
+                  fi # end Check Device Makefile for twrp-14
+
+
+                # Compile twrp-14
                 elif [[ ${{ inputs.RECOVERY }} == *"twrp-12.1"* ]]; then
-                    if [[ ${{ env.find_makefile_types }} == *"twrp"* ]]; then
-                        # Compile Recovery
-                        function compile() {
-                            start=$(date +"%s")
-                            source build/envsetup.sh
-                            lunch ${{ env.device_makefile }}-eng
-                            mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
-                            end=$(date +"%s")
-                            times=$((end - start))
-                            export minutes=$((times / 60))
-                            export seconds=$((times % 60))
-                        }
-                        compile
+                  echo -e "${{ env.text-green}}[INFO] Compiling Recovery: ${{ inputs.RECOVERY }}${{ env.text-reset_color}}"
+                  
+                  # Check Device Makefile
+                  if [[ ${{ env.find_makefile_types }} == *"twrp"* ]]; then
+                    echo -e "${{ env.text-green}}[INFO]${{ env.text-reset_color}}Compiling Recovery: ${{ inputs.RECOVERY }} For Codename: ${{ env.codename }}"
 
-                        # Read Logs
-                        logs_build=$(cat compile-${{ env.device_makefile }}.log)
+                    function compile() {
+                      start=$(date +%s)
+                      source build/envsetup.sh
+                      lunch ${{ env.device_makefile }}-eng
+                      mka ${{ inputs.BUILD_VARIANT }} -j$(nproc --all) | 2>&1 tee compile_${{ env.device_makefile }}.log
+                      end=$(date +%s)
+                      time_man=$((end - start))
 
-                        if [[ ${{ inputs.SEND_TG }} == *"true"* ]]; then
-                          if [[ ${logs_build} == *"build completed successfully"* ]]; then
-                            # File Stuff
-                            builddt=$(cat out/build_date.txt)
-                            mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/twrp-${{ env.codename }}-${builddt}
+                      # Minutes And Second
+                      export hours=$((time_man / 3600))
+                      export minutes=$(((time_man % 3600 ) / 60 ))
+                      export seconds=$((time_man % 60))
+                    } 
+                    compile # Compile 
 
-                            # Send Log
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}" \
-                              -F document="@compile-${{ env.device_makefile }}.log" \
-                              -F caption="*Success Build!* \`${{ inputs.RECOVERY }}\` *For Device:* \`${{ inputs.CODENAME }}\`*" \
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
+                    read_logs=$(cat compile_${{ env.device_makefile }}.log)
 
-                            # Send File
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}"
-                              -F document="@out/target/product/${{ env.codename }}/twrp-${{ env.codename }}-${builddt}" \
-                              -F caption="*Build Completed Successfuly at* \`${minutes}\`*m* \`${seconds}\`*s*"
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
-                          else
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}"
-                              -F document="@compile-${{ env.device_makefile }}.log" \
-                              -F caption="*Build Failed at* \`${minutes}\`*m* \`${seconds}\`*s*"
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
-                          fi
-                        else
-                        fi # Condition Check TG?
-                    fi
+                    if [[ ${read_logs} == *"build completed successfully"* ]]; then # Check Build Error Or Not
+                      echo -e "${{ env.text-green}}[SUCCESS]${{ env.text-reset_color}}Success Building ${{ inputs.RECOVERY }} For Device ${{ env.codename }}"
+                      if [[ ${{ inputs.SEND_TG}} == *"true"* ]]; then # Send To Telegram Bot?
+                        echo -e "${{ env.text-green}}[UPLOAD]${{ env.text-reset_color}} Uploading Log To Telegram BOT"
+                        # Send Logs
+                        curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                          -F chat_id=${{ env.tg_chat_id }} \
+                          -F document="@compile_${{ env.device_makefile }}" \
+                          -F caption="*Build Success For Device* \`${{ env.codename }}\`" \
+                          -F parse_mode="Markdown" \
+                          -F disable_notification=False \
+                          | jq -r '.result'
 
-                # Build PBRP Branch android-12.1 
-                elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-12.1"* ]]; then
-                    if [[ ${{ env.find_makefile_types }} == *"pb"* ]]; then
-                        # Compile Recovery
-                        function compile() {
-                            start=$(date +"%s")
-                            source build/envsetup.sh
-                            lunch ${{ env.device_makefile }}-eng
-                            mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
-                            end=$(date +"%s")
-                            times=$((end - start))
-                            export minutes=$((times / 60))
-                            export seconds=$((times % 60))
-                        }
-                        compile
-                        
-                        # Read Logs
-                        logs_build=$(cat compile-${{ env.device_makefile }}.log)
+                        # Upload File But Spesify Build Variant
+                        if [[ ${{ inputs.BUILD_VARIANT }} == *"bootimage"* ]]; then # Check Build variant (bootimage)
+                          echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
+                          read_builddate=$(out/build_date.txt)
+                          mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/boot-twrp_${{ env.codename }}-${read_builddate}.img
 
-                        if [[ ${{ inputs.SEND_TG }} == *"true"* ]]; then
-                          if [[ ${logs_build} == *"build completed successfully"* ]]; then
-                            # File Stuff
-                            builddt=$(cat out/build_date.txt)
-                            mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/pbrp-${{ env.codename }}-${builddt}
+                          # Send File
+                          curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                            -F chat_id=${{ env.tg_chat_id }} \
+                            -F document="@out/target/product/${{ env.codename }}/boot-twrp_${{ env.codename }}-${read_builddate}.img" \
+                            -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                            -F parse_mode="Markdown" \
+                            -F disable_notification=False \
+                            | jq -r '.result'
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; # Check Build variant (vendor_boot)
+                          # VENDOR_BOOT
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"recovery"* ]]; # Check Build variant (recovery)
+                          # RECOVERY
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"pbrp"* ]]; # Check Build variant (pbrp)
+                          echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
+                          f_zip=$(find out/target/product/${{ env.codename }} -name "*PBRP-${{ env.codename }}-*")
 
-                            # Send Log
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}" \
-                              -F document="@compile-${{ env.device_makefile }}.log" \
-                              -F caption="*Success Build!* \`${{ inputs.RECOVERY }}\` *For Device:* \`${{ inputs.CODENAME }}\`*" \
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
+                          # Send File
+                          curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                            -F chat_id=${{ env.tg_chat_id }} \
+                            -F document="@${f_zip}" \
+                            -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                            -F parse_mode="Markdown" \
+                            -F disable_notification=False \
+                            | jq -r '.result'
+                        fi # End Check Build variant
+                      fi # End Send To Telegram Bot?
+                    else
+                      echo -e "${{ env.text-green}}[FAILED]${{ env.text-reset_color}}Failed Building ${{ inputs.RECOVERY }} For Device ${{ env.codename }} Please Check Logs In Your Bots Or Releases In Github"
+                      curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                        -F chat_id=${{ env.tg_chat_id }} \
+                        -F document="@compile_${{ env.device_makefile }}.log}" \
+                        -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                        -F parse_mode="Markdown" \
+                        -F disable_notification=False \
+                        | jq -r '.result'
+                    fi # End Check Build Error Or Not
+                  else
+                    echo -e "${{ env.text-red }}[ERROR]${{ env.text-reset_color}}Your Device Makefile ${{ env.device_makefile }}Not Supported please use twrp_<codename>.mk"
+                    exit 1
+                  fi # end Check Device Makefile for twrp-14
 
-                            # Send File
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}"
-                              -F document="@out/target/product/${{ env.codename }}/twrp-${{ env.codename }}-${builddt}" \
-                              -F caption="*Build Completed Successfuly at* \`${minutes}\`*m* \`${seconds}\`*s*"
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
-                          else
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}"
-                              -F document="@compile-${{ env.device_makefile }}.log" \
-                              -F caption="*Build Failed at* \`${minutes}\`*m* \`${seconds}\`*s*"
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
-                          fi
-                        else
-                        fi # Condition Check TG?
-                    fi
+                # Compile pbrp-android-12.1
+                elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-12.1* ]]; then
+                  echo -e "${{ env.text-green}}[INFO] Compiling Recovery: ${{ inputs.RECOVERY }}${{ env.text-reset_color}}"
+                  
+                  # Check Device Makefile
+                  if [[ ${{ env.find_makefile_types }} == *"pb"* ]]; then
+                    echo -e "${{ env.text-green}}[INFO]${{ env.text-reset_color}}Compiling Recovery: ${{ inputs.RECOVERY }} For Codename: ${{ env.codename }}"
 
-                # Build PBRP Branch android-14.0 
-                elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-14.0"* ]]; then
-                    if [[ ${{ env.find_makefile_types }} == *"pb"* ]]; then
-                        # Compile Recovery
-                        function compile() {
-                            start=$(date +"%s")
-                            source build/envsetup.sh
-                            lunch ${{ env.device_makefile }}-eng
-                            mka ${{ inputs.BUILD_VARIANT }} | 2>&1 tee compile-${{ env.device_makefile }}.log
-                            end=$(date +"%s")
-                            times=$((end - start))
-                            export minutes=$((times / 60))
-                            export seconds=$((times % 60))
-                        }
-                        compile
-                        
-                        # Read Logs
-                        logs_build=$(cat compile-${{ env.device_makefile }}.log)
+                    function compile() {
+                      start=$(date +%s)
+                      source build/envsetup.sh
+                      lunch ${{ env.device_makefile }}-eng
+                      mka ${{ inputs.BUILD_VARIANT }} -j$(nproc --all) | 2>&1 tee compile_${{ env.device_makefile }}.log
+                      end=$(date +%s)
+                      time_man=$((end - start))
 
-                        if [[ ${{ inputs.SEND_TG }} == *"true"* ]]; then
-                          if [[ ${logs_build} == *"build completed successfully"* ]]; then
-                            # File Stuff
-                            builddt=$(cat out/build_date.txt)
-                            mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/pbrp-${{ env.codename }}-${builddt}
+                      # Minutes And Second
+                      export hours=$((time_man / 3600))
+                      export minutes=$(((time_man % 3600 ) / 60 ))
+                      export seconds=$((time_man % 60))
+                    } 
+                    compile # Compile 
 
-                            # Send Log
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}" \
-                              -F document="@compile-${{ env.device_makefile }}.log" \
-                              -F caption="*Success Build!* \`${{ inputs.RECOVERY }}\` *For Device:* \`${{ inputs.CODENAME }}\`*" \
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
+                    read_logs=$(cat compile_${{ env.device_makefile }}.log)
 
-                            # Send File
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}"
-                              -F document="@out/target/product/${{ env.codename }}/twrp-${{ env.codename }}-${builddt}" \
-                              -F caption="*Build Completed Successfuly at* \`${minutes}\`*m* \`${seconds}\`*s*"
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
-                          else
-                            curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
-                              -F chat_id="${{ env.tg_chat_id }}"
-                              -F document="@compile-${{ env.device_makefile }}.log" \
-                              -F caption="*Build Failed at* \`${minutes}\`*m* \`${seconds}\`*s*"
-                              -F parse_mode=Markdown \
-                              -F disable_notification=False
-                          fi
-                        else
-                        fi # Condition Check TG?
-                    fi
-                fi
+                    if [[ ${read_logs} == *"build completed successfully"* ]]; then # Check Build Error Or Not
+                      echo -e "${{ env.text-green}}[SUCCESS]${{ env.text-reset_color}}Success Building ${{ inputs.RECOVERY }} For Device ${{ env.codename }}"
+                      if [[ ${{ inputs.SEND_TG}} == *"true"* ]]; then # Send To Telegram Bot?
+                        echo -e "${{ env.text-green}}[UPLOAD]${{ env.text-reset_color}} Uploading Log To Telegram BOT"
+                        # Send Logs
+                        curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                          -F chat_id=${{ env.tg_chat_id }} \
+                          -F document="@compile_${{ env.device_makefile }}" \
+                          -F caption="*Build Success For Device* \`${{ env.codename }}\`" \
+                          -F parse_mode="Markdown" \
+                          -F disable_notification=False \
+                          | jq -r '.result'
+
+                        # Upload File But Spesify Build Variant
+                        if [[ ${{ inputs.BUILD_VARIANT }} == *"bootimage"* ]]; then # Check Build variant (bootimage)
+                          echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
+                          read_builddate=$(out/build_date.txt)
+                          mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/boot-pbrp_${{ env.codename }}-${read_builddate}.img
+
+                          # Send File
+                          curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                            -F chat_id=${{ env.tg_chat_id }} \
+                            -F document="@out/target/product/${{ env.codename }}/boot-prbp_${{ env.codename }}-${read_builddate}.img" \
+                            -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                            -F parse_mode="Markdown" \
+                            -F disable_notification=False \
+                            | jq -r '.result'
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; # Check Build variant (vendor_boot)
+                          # VENDOR_BOOT
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"recovery"* ]]; # Check Build variant (recovery)
+                          # RECOVERY
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"pbrp"* ]]; # Check Build variant (pbrp)
+                          echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
+                          f_zip=$(find out/target/product/${{ env.codename }} -name "*PBRP-${{ env.codename }}-*")
+
+                          # Send File
+                          curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                            -F chat_id=${{ env.tg_chat_id }} \
+                            -F document="@${f_zip}" \
+                            -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                            -F parse_mode="Markdown" \
+                            -F disable_notification=False \
+                            | jq -r '.result'
+                        fi # End Check Build variant
+                      fi # End Send To Telegram Bot?
+                    else
+                      echo -e "${{ env.text-green}}[FAILED]${{ env.text-reset_color}}Failed Building ${{ inputs.RECOVERY }} For Device ${{ env.codename }} Please Check Logs In Your Bots Or Releases In Github"
+                      curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                        -F chat_id=${{ env.tg_chat_id }} \
+                        -F document="@compile_${{ env.device_makefile }}.log}" \
+                        -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                        -F parse_mode="Markdown" \
+                        -F disable_notification=False \
+                        | jq -r '.result'
+                    fi # End Check Build Error Or Not
+                  else
+                    echo -e "${{ env.text-red }}[ERROR]${{ env.text-reset_color}}Your Device Makefile ${{ env.device_makefile }}Not Supported please use pb_<codename>.mk"
+                    exit 1
+                  fi # end Check Device Makefile for twrp-14
+
+                # Compile pbrp-android-14.0
+                elif [[ ${{ inputs.RECOVERY }} == *"pbrp-android-14.0* ]]; then
+                  echo -e "${{ env.text-green}}[INFO] Compiling Recovery: ${{ inputs.RECOVERY }}${{ env.text-reset_color}}"
+                  
+                  # Check Device Makefile
+                  if [[ ${{ env.find_makefile_types }} == *"pb"* ]]; then
+                    echo -e "${{ env.text-green}}[INFO]${{ env.text-reset_color}}Compiling Recovery: ${{ inputs.RECOVERY }} For Codename: ${{ env.codename }}"
+
+                    function compile() {
+                      start=$(date +%s)
+                      source build/envsetup.sh
+                      lunch ${{ env.device_makefile }}-eng
+                      mka ${{ inputs.BUILD_VARIANT }} -j$(nproc --all) | 2>&1 tee compile_${{ env.device_makefile }}.log
+                      end=$(date +%s)
+                      time_man=$((end - start))
+
+                      # Minutes And Second
+                      export hours=$((time_man / 3600))
+                      export minutes=$(((time_man % 3600 ) / 60 ))
+                      export seconds=$((time_man % 60))
+                    } 
+                    compile # Compile 
+
+                    read_logs=$(cat compile_${{ env.device_makefile }}.log)
+
+                    if [[ ${read_logs} == *"build completed successfully"* ]]; then # Check Build Error Or Not
+                      echo -e "${{ env.text-green}}[SUCCESS]${{ env.text-reset_color}}Success Building ${{ inputs.RECOVERY }} For Device ${{ env.codename }}"
+                      if [[ ${{ inputs.SEND_TG}} == *"true"* ]]; then # Send To Telegram Bot?
+                        echo -e "${{ env.text-green}}[UPLOAD]${{ env.text-reset_color}} Uploading Log To Telegram BOT"
+                        # Send Logs
+                        curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                          -F chat_id=${{ env.tg_chat_id }} \
+                          -F document="@compile_${{ env.device_makefile }}" \
+                          -F caption="*Build Success For Device* \`${{ env.codename }}\`" \
+                          -F parse_mode="Markdown" \
+                          -F disable_notification=False \
+                          | jq -r '.result'
+
+                        # Upload File But Spesify Build Variant
+                        if [[ ${{ inputs.BUILD_VARIANT }} == *"bootimage"* ]]; then # Check Build variant (bootimage)
+                          echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
+                          read_builddate=$(out/build_date.txt)
+                          mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/boot-pbrp_${{ env.codename }}-${read_builddate}.img
+
+                          # Send File
+                          curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                            -F chat_id=${{ env.tg_chat_id }} \
+                            -F document="@out/target/product/${{ env.codename }}/boot-prbp_${{ env.codename }}-${read_builddate}.img" \
+                            -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                            -F parse_mode="Markdown" \
+                            -F disable_notification=False \
+                            | jq -r '.result'
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; # Check Build variant (vendor_boot)
+                          # VENDOR_BOOT
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"recovery"* ]]; # Check Build variant (recovery)
+                          # RECOVERY
+                        elif [[ ${{ inputs.BUILD_VARIANT }} == *"pbrp"* ]]; # Check Build variant (pbrp)
+                          echo -e "${{ env.text-green}}[UPLOADING]${{ env.text-reset_color}} Uploading Compiled File To Telegram BOT"
+                          f_zip=$(find out/target/product/${{ env.codename }} -name "*PBRP-${{ env.codename }}-*")
+
+                          # Send File
+                          curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                            -F chat_id=${{ env.tg_chat_id }} \
+                            -F document="@${f_zip}" \
+                            -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                            -F parse_mode="Markdown" \
+                            -F disable_notification=False \
+                            | jq -r '.result'
+                        fi # End Check Build variant
+                      fi # End Send To Telegram Bot?
+                    else
+                      echo -e "${{ env.text-green}}[FAILED]${{ env.text-reset_color}}Failed Building ${{ inputs.RECOVERY }} For Device ${{ env.codename }} Please Check Logs In Your Bots Or Releases In Github"
+                      curl -s -X POST "http://apibot.dhooo.biz.id/bot${{ env.BOT_TOKEN }}/sendDocument" \
+                        -F chat_id=${{ env.tg_chat_id }} \
+                        -F document="@compile_${{ env.device_makefile }}.log}" \
+                        -F caption="*Build Success Take Time* \`${hours}\`*h* \`${minutes}\`*m* \`${seconds}\`*s*" \
+                        -F parse_mode="Markdown" \
+                        -F disable_notification=False \
+                        | jq -r '.result'
+                    fi # End Check Build Error Or Not
+                  else
+                    echo -e "${{ env.text-red }}[ERROR]${{ env.text-reset_color}}Your Device Makefile ${{ env.device_makefile }}Not Supported please use pb_<codename>.mk"
+                    exit 1
+                  fi # end Check Device Makefile for twrp-14
+                fi # End Compiling condition (twrp-14 | twrp-12.1 | pbrp-android-12.1 | pbrp-android-14.0)

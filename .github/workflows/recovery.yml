@@ -94,6 +94,9 @@ jobs:
           # Format Date and Time
           timedate_utils: $(date +"%A, %d %B %Y %-I:%M %p")
 
+          # Build Stuff
+          read_builddate: $(cat out/build_date.txt)
+
         permissions:
             contents: write
 
@@ -198,7 +201,7 @@ jobs:
                           #  Upload File But Spesify Build Variant
                           if [[ ${{ inputs.BUILD_VARIANT }} == *"bootimage"* ]]; then
                             echo -e "[${{ env.timedate_utils }}]${{ env.text-green }}[UPLOAD]${{ env.text-reset_color }} Uploading File Compile To Telegram BOT"
-                            read_builddate=$(out/build_date.txt)
+                            read_builddate=${{ env.read_builddate }}
                             mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/boot-twrp_${{ env.codename }}-${read_builddate}.img
 
                             # Send File
@@ -211,7 +214,7 @@ jobs:
                               | jq -r '.result'
                           elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; then
                             echo -e "[${{ env.timedate_utils }}]${{ env.text-green }}[UPLOAD]${{ env.text-reset_color }} Uploading File Compile To Telegram BOT"
-                            read_builddate=$(out/build_date.txt)
+                            read_builddate=${{ env.read_builddate }}
                             mv out/target/product/${{ env.codename }}/vendor_boot.img out/target/product/${{ env.codename }}/vendor_boot-twrp_${{ env.codename }}-${read_builddate}.img
 
                             # Send File
@@ -224,7 +227,7 @@ jobs:
                               | jq -r '.result'
                           elif [[ ${{ inputs.BUILD_VARIANT }} == *"recovery"* ]]; then
                             echo -e "[${{ env.timedate_utils }}]${{ env.text-green }}[UPLOAD]${{ env.text-reset_color }} Uploading File Compile To Telegram BOT"
-                            read_builddate=$(out/build_date.txt)
+                            read_builddate=${{ env.read_builddate }}
                             mv out/target/product/${{ env.codename }}/recovery.img out/target/product/${{ env.codename }}/recovery-twrp_${{ env.codename }}-${read_builddate}.img
 
                             # Send File
@@ -293,7 +296,7 @@ jobs:
                           #  Upload File But Spesify Build Variant
                           if [[ ${{ inputs.BUILD_VARIANT }} == *"bootimage"* ]]; then
                             echo -e "[${{ env.timedate_utils }}]${{ env.text-green }}[UPLOAD]${{ env.text-reset_color }} Uploading File Compile To Telegram BOT"
-                            read_builddate=$(out/build_date.txt)
+                            read_builddate=${{ env.read_builddate }}
                             mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/boot-twrp_${{ env.codename }}-${read_builddate}.img
 
                             # Send File
@@ -306,7 +309,7 @@ jobs:
                               | jq -r '.result'
                           elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; then
                             echo -e "[${{ env.timedate_utils }}]${{ env.text-green }}[UPLOAD]${{ env.text-reset_color }} Uploading File Compile To Telegram BOT"
-                            read_builddate=$(out/build_date.txt)
+                            read_builddate=${{ env.read_builddate }}
                             mv out/target/product/${{ env.codename }}/vendor_boot.img out/target/product/${{ env.codename }}/vendor_boot-twrp_${{ env.codename }}-${read_builddate}.img
 
                             # Send File
@@ -319,7 +322,7 @@ jobs:
                               | jq -r '.result'
                           elif [[ ${{ inputs.BUILD_VARIANT }} == *"recovery"* ]]; then
                             echo -e "[${{ env.timedate_utils }}]${{ env.text-green }}[UPLOAD]${{ env.text-reset_color }} Uploading File Compile To Telegram BOT"
-                            read_builddate=$(out/build_date.txt)
+                            read_builddate=${{ env.read_builddate }}
                             mv out/target/product/${{ env.codename }}/recovery.img out/target/product/${{ env.codename }}/recovery-twrp_${{ env.codename }}-${read_builddate}.img
 
                             # Send File
@@ -388,7 +391,7 @@ jobs:
                           #  Upload File But Spesify Build Variant
                           if [[ ${{ inputs.BUILD_VARIANT }} == *"bootimage"* ]]; then
                             echo -e "[${{ env.timedate_utils }}]${{ env.text-green }}[UPLOAD]${{ env.text-reset_color }} Uploading File Compile To Telegram BOT"
-                            read_builddate=$(out/build_date.txt)
+                            read_builddate=${{ env.read_builddate }}
                             mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/boot-pbrp_${{ env.codename }}-${read_builddate}.img
 
                             # Send File
@@ -401,7 +404,7 @@ jobs:
                               | jq -r '.result'
                           elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; then
                             echo -e "[${{ env.timedate_utils }}]${{ env.text-green }}[UPLOAD]${{ env.text-reset_color }} Uploading File Compile To Telegram BOT"
-                            read_builddate=$(out/build_date.txt)
+                            read_builddate=${{ env.read_builddate }}
                             mv out/target/product/${{ env.codename }}/vendor_boot.img out/target/product/${{ env.codename }}/vendor_boot-pbrp_${{ env.codename }}-${read_builddate}.img
 
                             # Send File
@@ -483,7 +486,7 @@ jobs:
                           #  Upload File But Spesify Build Variant
                           if [[ ${{ inputs.BUILD_VARIANT }} == *"bootimage"* ]]; then
                             echo -e "[${{ env.timedate_utils }}]${{ env.text-green }}[UPLOAD]${{ env.text-reset_color }} Uploading File Compile To Telegram BOT"
-                            read_builddate=$(out/build_date.txt)
+                            read_builddate=${{ env.read_builddate }}
                             mv out/target/product/${{ env.codename }}/boot.img out/target/product/${{ env.codename }}/boot-pbrp_${{ env.codename }}-${read_builddate}.img
 
                             # Send File
@@ -496,7 +499,7 @@ jobs:
                               | jq -r '.result'
                           elif [[ ${{ inputs.BUILD_VARIANT }} == *"vendor_boot"* ]]; then
                             echo -e "[${{ env.timedate_utils }}]${{ env.text-green }}[UPLOAD]${{ env.text-reset_color }} Uploading File Compile To Telegram BOT"
-                            read_builddate=$(out/build_date.txt)
+                            read_builddate=${{ env.read_builddate }}
                             mv out/target/product/${{ env.codename }}/vendor_boot.img out/target/product/${{ env.codename }}/vendor_boot-pbrp_${{ env.codename }}-${read_builddate}.img
 
                             # Send File
@@ -509,7 +512,7 @@ jobs:
                               | jq -r '.result'
                           elif [[ ${{ inputs.BUILD_VARIANT }} == *"recovery"* ]]; then
                             echo -e "[${{ env.timedate_utils }}]${{ env.text-green }}[UPLOAD]${{ env.text-reset_color }} Uploading File Compile To Telegram BOT"
-                            read_builddate=$(out/build_date.txt)
+                            read_builddate=${{ env.read_builddate }}
                             mv out/target/product/${{ env.codename }}/recovery.img out/target/product/${{ env.codename }}/recovery-pbrp_${{ env.codename }}-${read_builddate}.img
 
                             # Send File
@@ -549,7 +552,17 @@ jobs:
               with:
                 files: |
                   compile-${{ env.device_makefile }}.log
-                  out/target/product/${{ env.codename }}/PBRP*.zip
-                  out/target/product/${{ env.codename }}/twrp-installer*.zip
-                  out/target/product/${{ env.codename }}/*.zip
+                  out/target/product/${{ env.codename }}/PBRP-${{ env.codename }}*.zip
                   out/target/product/${{ env.codename}}/boot.img
+                  
+                  # TWRP
+                  out/target/product/${{ env.codename }}/boot-twrp_${{ env.codename }}-${{ env.read_builddate }}.img
+                  out/target/product/${{ env.codename }}/vendor_boot-twrp_${{ env.codename }}-${{ env.read_builddate }}.img
+                  out/target/product/${{ env.codename }}/recovery-twrp_${{ env.codename }}-${{ env.read_builddate }}.img
+                  $(find out/target/product/${{ env.codename }} -name "*PBRP-${{ env.codename }}-*)
+
+                  # PBRP
+                  out/target/product/${{ env.codename }}/boot-pbrp_${{ env.codename }}-${{ env.read_builddate }}.img
+                  out/target/product/${{ env.codename }}/vendor_boot-pbrp_${{ env.codename }}-${{ env.read_builddate }}.img
+                  out/target/product/${{ env.codename }}/recovery-pbrp_${{ env.codename }}-${{ env.read_builddate }}.img
+                  $(find out/target/product/${{ env.codename }} -name "*PBRP-${{ env.codename }}-*)
